@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel - Impostor Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+        .card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+            padding: 28px 24px 20px 24px;
+            margin-bottom: 0;
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-title {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #333;
+        }
+        .console-output {
+            background: #181c20;
+            color: #b6e1ff;
+            font-family: 'Fira Mono', 'Consolas', monospace;
+            font-size: 0.98em;
+            border-radius: 10px;
+            padding: 18px 12px;
+            min-height: 180px;
+            max-height: 260px;
+            overflow-y: auto;
+            margin-bottom: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 10px 0;
+        }
+        .stats-list li {
+            margin-bottom: 7px;
+            color: #444;
+        }
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .player-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 10px 18px 10px 16px;
+            position: relative;
+            font-weight: 500;
+            color: #333;
+            min-width: 90px;
+            margin-bottom: 0;
+            transition: box-shadow 0.2s, background 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            cursor: pointer;
+        }
+        .player-card:hover {
+            background: #ffeaea;
+            box-shadow: 0 4px 16px rgba(231,76,60,0.13);
+        }
+        .kick-cross {
+            display: none;
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            color: #e74c3c;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .player-card:hover .kick-cross {
+            display: block;
+        }
+        .spicy-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .spicy-btn {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #555;
+            transition: background 0.2s, color 0.2s;
+        }
+        .spicy-btn.active {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #222;
+        }
+        .spicy-btn.forced.active {
+            background: linear-gradient(135deg, #e74c3c 0%, #f39c12 100%);
+            color: #fff;
+        }
+        .spicy-btn.disabled.active {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: #fff;
+        }
+        .settings-list label {
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        .settings-list input {
+            width: 60px;
+            padding: 4px 6px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 16px;
+        }
+        .settings-save-btn {
+            margin-top: 10px;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .action-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            transition: background 0.2s;
+        }
+        .action-btn.reset {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        .action-btn.leaderboard {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+        .action-btn.copy {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        .action-btn:active {
+            filter: brightness(0.95);
+        }
+        .leaderboard-reset-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .spicy-announcement {
+            margin-top: 12px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.08em;
+            display: inline-block;
+        }
+        .spicy-announcement.forced {
+            background: #ffeaea;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+        .spicy-announcement.possible {
+            background: #fff6e0;
+            color: #e67e22;
+            border: 2px solid #e67e22;
+        }
+        .spicy-toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .spicy-toggle-label {
+            font-size: 0.98em;
+            font-weight: 500;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .spicy-toggle-checkbox {
+            width: 18px;
+            height: 18px;
+        }
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color:#333;margin-top:32px;margin-bottom:0;font-size:2.1em;">🎛️ Control Panel</h1>
+    <button onclick="window.location.href='/';" class="action-btn" style="margin-bottom:18px;min-width:unset;padding:8px 18px;font-size:15px;float:right;">🏠 Zurück zur Lobby</button>
+    <div class="dashboard">
+        <!-- Console Output Card -->
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-title">🖥️ Deployment Console Output</div>
+            <div class="console-output" id="console-output">Lade...</div>
+        </div>
+        <!-- Live Stats Card -->
+        <div class="card">
+            <div class="card-title">📊 Live Stats</div>
+            <ul class="stats-list" id="stats-list"></ul>
+            <button class="action-btn copy" id="copy-link-btn">🔗 Game-Link kopieren</button>
+        </div>
+        <!-- Player List Card -->
+        <div class="card">
+            <div class="card-title">👥 Spieler</div>
+            <div class="player-list" id="player-list"></div>
+        </div>
+        <!-- Game Controls Card -->
+        <div class="card">
+            <div class="card-title">🎮 Game Controls</div>
+            <button class="action-btn" id="start-game-btn">🎬 Spiel starten</button>
+            <button class="action-btn reset" id="reset-game-btn">🔄 Spiel zurücksetzen</button>
+            <div class="leaderboard-reset-group">
+                <button class="action-btn leaderboard" onclick="resetLeaderboard('players')">Player LB zurücksetzen</button>
+                <button class="action-btn leaderboard" onclick="resetLeaderboard('impostors')">Impostor LB zurücksetzen</button>
+                <button class="action-btn leaderboard" onclick="resetLeaderboard('both')">Beide LBs zurücksetzen</button>
+            </div>
+        </div>
+        <!-- Spicy Mode Card -->
+        <div class="card">
+            <div class="card-title">🌶️ Spicy Mode</div>
+            <div class="spicy-toggle">
+                <button class="spicy-btn disabled" id="spicy-disabled">Deaktiviert</button>
+                <button class="spicy-btn" id="spicy-possible">Möglich</button>
+                <button class="spicy-btn forced" id="spicy-forced">Erzwingen</button>
+            </div>
+            <div class="spicy-toggle-row">
+                <label class="spicy-toggle-label">
+                    <input type="checkbox" id="announce-spicy-toggle" class="spicy-toggle-checkbox">
+                    Spicy-Status im Lobby-Chat anzeigen
+                </label>
+            </div>
+            <div id="spicy-mode-status" style="margin-top:8px;font-weight:500;"></div>
+        </div>
+        <!-- Settings Card -->
+        <div class="card">
+            <div class="card-title">⚙️ Einstellungen</div>
+            <form id="settings-form">
+                <div class="settings-list">
+                    <label for="heartbeat-timeout">Heartbeat Timeout (s):</label>
+                    <input type="number" id="heartbeat-timeout" name="heartbeat-timeout" min="2" max="60">
+                    <label for="cleanup-interval">Cleanup Interval (s):</label>
+                    <input type="number" id="cleanup-interval" name="cleanup-interval" min="2" max="60">
+                </div>
+                <button type="submit" class="settings-save-btn">Speichern</button>
+            </form>
+            <div id="settings-status" style="margin-top:8px;font-size:0.98em;"></div>
+            <hr style="margin:18px 0;">
+            <div style="margin-bottom:10px;font-weight:500;">🔑 Admin-Passwort ändern</div>
+            <form id="change-password-form" style="display:flex;gap:10px;align-items:center;">
+                <input type="password" id="new-password" placeholder="Neues Passwort" minlength="4" style="flex:1;padding:8px 12px;border-radius:6px;border:1.5px solid #ccc;font-size:1em;">
+                <button type="submit" class="settings-save-btn" style="padding:8px 18px;">Ändern</button>
+            </form>
+            <div id="password-status" style="margin-top:8px;font-size:0.98em;"></div>
+        </div>
+    </div>
+    <script>
+    // --- Console Output ---
+    function updateConsole() {
+        fetch('/api/console_output').then(r => r.json()).then(data => {
+            document.getElementById('console-output').textContent = data.output || 'No output.';
+        });
+    }
+    setInterval(updateConsole, 4000);
+    updateConsole();
+
+    // --- Live Stats ---
+    let gameLink = window.location.origin + '/';
+    function updateStats() {
+        fetch('/api/control_stats').then(r => r.json()).then(data => {
+            let stats = [
+                `<b>Status:</b> ${data.game_state}`,
+                `<b>Spieler:</b> ${data.player_count}`,
+                `<b>Impostor:</b> ${data.impostor || '-'}`,
+                `<b>Aktuelle Runde:</b> ${data.round}`,
+                `<b>Game gestartet:</b> ${data.game_started ? 'Ja' : 'Nein'}`,
+                `<b>Voting aktiv:</b> ${data.voting_active ? 'Ja' : 'Nein'}`,
+                `<b>Gewinnerwort:</b> ${data.winning_word || '-'}`
+            ];
+            document.getElementById('stats-list').innerHTML = stats.map(s => `<li>${s}</li>`).join('');
+            // Update player list
+            updatePlayerList(data.players);
+            // Update spicy mode
+            updateSpicyMode(data.spicy_mode, data.announce_spicy_mode);
+            // Update settings
+            document.getElementById('heartbeat-timeout').value = data.settings.heartbeat_timeout;
+            document.getElementById('cleanup-interval').value = data.settings.cleanup_interval;
+        });
+    }
+    setInterval(updateStats, 2000);
+    updateStats();
+
+    // --- Player List ---
+    function updatePlayerList(players) {
+        let html = '';
+        players.forEach(player => {
+            html += `<div class="player-card" data-player="${player}">
+                        <span>${player}</span>
+                        <span class="kick-cross" title="Kicken" onclick="kickPlayer('${player}')">×</span>
+                    </div>`;
+        });
+        document.getElementById('player-list').innerHTML = html;
+    }
+    function kickPlayer(player) {
+        if(confirm(`Spieler "${player}" wirklich kicken?`)) {
+            fetch('/api/kick_player', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({player_name: player})
+            }).then(() => updateStats());
+        }
+    }
+
+    // --- Reset Game ---
+    document.getElementById('reset-game-btn').onclick = function() {
+        if(confirm('Spiel und alle Spieler zurücksetzen?')) {
+            window.location.href = '/control/reset_game';
+        }
+    };
+
+    // --- Reset Leaderboard ---
+    function resetLeaderboard(which) {
+        if(confirm('Leaderboard wirklich zurücksetzen?')) {
+            fetch('/api/reset_leaderboard', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({which: which})
+            }).then(() => alert('Leaderboard zurückgesetzt!'));
+        }
+    }
+
+    // --- Start Game ---
+    document.getElementById('start-game-btn').onclick = function() {
+        window.location.href = '/control/start_game';
+    };
+
+    // --- Spicy Mode Toggle ---
+    function updateSpicyMode(mode, announce) {
+        let status = '';
+        let statusField = document.getElementById('spicy-mode-status');
+        statusField.innerHTML = '';
+        document.getElementById('spicy-disabled').classList.remove('active');
+        document.getElementById('spicy-possible').classList.remove('active');
+        document.getElementById('spicy-forced').classList.remove('active');
+        if(mode === 'disabled') {
+            document.getElementById('spicy-disabled').classList.add('active');
+            status = 'Nur normale Wörter.';
+        } else if(mode === 'possible') {
+            document.getElementById('spicy-possible').classList.add('active');
+            status = 'Normale + Spicy Wörter.';
+            statusField.innerHTML = '<span class="spicy-announcement possible">Normal + Spicy Wörter!</span>';
+        } else if(mode === 'forced') {
+            document.getElementById('spicy-forced').classList.add('active');
+            status = 'Nur Spicy Wörter!';
+            statusField.innerHTML = '<span class="spicy-announcement forced">Nur Spicy Wörter!</span>';
+        }
+        if(mode === 'disabled') statusField.textContent = status;
+        // Set the checkbox for announce spicy mode
+        fetch('/api/settings').then(r => r.json()).then(settings => {
+            document.getElementById('announce-spicy-toggle').checked = !!settings.announce_spicy_mode;
+        });
+    }
+    document.getElementById('spicy-disabled').onclick = function() {
+        fetch('/api/spicy_mode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({mode: 'disabled'})
+        }).then(() => updateStats());
+    };
+    document.getElementById('spicy-possible').onclick = function() {
+        fetch('/api/spicy_mode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({mode: 'possible'})
+        }).then(() => updateStats());
+    };
+    document.getElementById('spicy-forced').onclick = function() {
+        fetch('/api/spicy_mode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({mode: 'forced'})
+        }).then(() => updateStats());
+    };
+
+    // --- Settings ---
+    document.getElementById('settings-form').onsubmit = function(e) {
+        e.preventDefault();
+        let heartbeat = document.getElementById('heartbeat-timeout').value;
+        let cleanup = document.getElementById('cleanup-interval').value;
+        fetch('/api/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({heartbeat_timeout: heartbeat, cleanup_interval: cleanup})
+        }).then(() => {
+            document.getElementById('settings-status').textContent = 'Gespeichert!';
+            setTimeout(() => document.getElementById('settings-status').textContent = '', 2000);
+        });
+    };
+
+    // --- Copy Game Link ---
+    document.getElementById('copy-link-btn').onclick = function() {
+        navigator.clipboard.writeText('https://impostergame.xyz');
+        this.textContent = '✅ Link kopiert!';
+        setTimeout(() => {
+            this.textContent = '🔗 Game-Link kopieren';
+        }, 1500);
+    };
+
+    document.getElementById('announce-spicy-toggle').onchange = function() {
+        fetch('/api/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({announce_spicy_mode: this.checked})
+        });
+    };
+
+    document.getElementById('change-password-form').onsubmit = function(e) {
+        e.preventDefault();
+        const pw = document.getElementById('new-password').value.trim();
+        const status = document.getElementById('password-status');
+        if (pw.length < 4) {
+            status.textContent = '❌ Passwort zu kurz (min. 4 Zeichen)';
+            status.style.color = '#e74c3c';
+            return;
+        }
+        fetch('/api/change_password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({new_password: pw})
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                status.textContent = '✅ Passwort erfolgreich geändert!';
+                status.style.color = '#27ae60';
+                document.getElementById('new-password').value = '';
+            } else {
+                status.textContent = '❌ ' + (data.error || 'Fehler beim Ändern');
+                status.style.color = '#e74c3c';
+            }
+        });
+    };
+    </script>
+</body>
+</html>

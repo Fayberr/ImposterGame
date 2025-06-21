@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dein Wort - Impostor Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 60px 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .player-name {
+            font-size: 1.5em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .word-display {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin: 40px 0;
+            padding: 40px;
+            border-radius: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-wrap: break-word;
+            line-height: 1.2;
+        }
+        
+        .civilian-word {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: 3px solid #0066cc;
+        }
+        
+        .impostor-word {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #333;
+            border: 3px solid #ff4757;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #856404;
+        }
+        
+        .back-button {
+            margin-top: 30px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="player-name">Hallo {{ name }}! 👋</div>
+        
+        {% if "IMPOSTOR" in role %}
+        <div class="word-display impostor-word">
+            🎭 IMPOSTOR 🎭
+        </div>
+        <div class="instructions">
+            <strong>Du bist der Impostor!</strong><br>
+            Du kennst das geheime Wort nicht. Höre gut zu, was die anderen sagen und versuche herauszufinden, was das Wort sein könnte. Gib vor, das Wort zu kennen, ohne dich zu verraten!
+        </div>
+        {% else %}
+        <div class="word-display civilian-word">
+            {{ role.split(': ')[1] }}
+        </div>
+        <div class="instructions">
+            <strong>Du bist ein normaler Spieler!</strong><br>
+            Das ist dein geheimes Wort. Beschreibe es, ohne es direkt zu nennen. Finde heraus, wer der Impostor ist!
+        </div>
+        {% endif %}
+        
+        <div class="warning">
+            ⚠️ Zeige diesen Bildschirm niemandem anderen!
+        </div>
+        
+        <a href="/" class="back-button">Zurück zur Lobby</a>
+    </div>
+</body>
+</html>

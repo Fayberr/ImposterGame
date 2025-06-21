@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impostor Game - Lobby</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+        }
+        .top-bar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            max-width: 1400px;
+            margin-bottom: 18px;
+            gap: 10px;
+        }
+        .control-button, .leave-button {
+            position: static !important;
+            display: inline-block;
+            margin: 0 8px 0 0;
+            top: unset;
+            left: unset;
+            right: unset;
+            z-index: 10;
+            min-width: 0;
+            width: auto;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+        .leave-button {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+        .control-button:hover, .leave-button:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+            text-decoration: none;
+        }
+        .game-layout {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            gap: 20px;
+            align-items: flex-start;
+            box-sizing: border-box;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            padding-top: 25px;
+            flex: 1;
+            text-align: center;
+            min-height: 80vh;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .leaderboard-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 280px;
+            max-height: 80vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .mobile-leaderboard {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .leaderboard-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .leaderboard-title.players {
+            color: #27ae60;
+            border-bottom-color: #27ae60;
+        }
+        .leaderboard-title.impostors {
+            color: #e74c3c;
+            border-bottom-color: #e74c3c;
+        }
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.2s;
+        }
+        .leaderboard-entry:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .leaderboard-entry.top-1 {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            font-weight: bold;
+        }
+        .leaderboard-entry.top-2 {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+            font-weight: bold;
+        }
+        .leaderboard-entry.top-3 {
+            background: linear-gradient(135deg, #cd7f32 0%, #daa520 100%);
+            font-weight: bold;
+        }
+        .leaderboard-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .leaderboard-wins {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            color: #666;
+        }
+        .trophy {
+            font-size: 1.1em;
+        }
+        .show-more-btn {
+            width: 100%;
+            padding: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .show-more-btn:hover {
+            background: #5a6fd8;
+        }
+        .mobile-leaderboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1200px) {
+            .game-layout {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+            }
+            .leaderboard-sidebar {
+                display: block;
+                position: static;
+                width: 260px;
+                margin-bottom: 0;
+            }
+            .container {
+                max-width: 700px;
+                margin: 0 20px;
+            }
+            .mobile-leaderboard {
+                display: none;
+            }
+        }
+        @media (max-width: 900px) {
+            .game-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+            .leaderboard-sidebar {
+                display: none !important;
+            }
+            .mobile-leaderboard {
+                display: block !important;
+                width: 100%;
+                margin: 0 auto 20px auto;
+            }
+            .container {
+                max-width: 98vw;
+                margin: 0 auto 20px auto;
+                padding-top: 10px !important;
+            }
+            .card-buttons-row {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                z-index: auto !important;
+                margin-bottom: 48px !important;
+                padding: 0 10px;
+                width: 100%;
+                gap: 18px;
+            }
+        }
+        @media (max-width: 767px) {
+            .leaderboard-sidebar {
+                display: none !important;
+            }
+            .mobile-leaderboard {
+                display: block !important;
+                width: 100%;
+                margin: 16px auto 0 auto;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+                padding: 10px 2vw 20px 2vw;
+            }
+            .mobile-leaderboard-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .mobile-leaderboard-grid > div {
+                margin-bottom: 0;
+            }
+            .card-buttons-row {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                z-index: auto !important;
+                margin-bottom: 35px !important;
+                padding: 0 5px;
+                width: 100%;
+                gap: 15px;
+            }
+            .container {
+                padding-top: 10px !important;
+            }
+        }
+        @media (min-width: 768px) {
+            .leaderboard-sidebar {
+                display: block !important;
+            }
+            .mobile-leaderboard {
+                display: none !important;
+            }
+        }
+        @media (max-width: 1199px) {
+            .card-buttons-row {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                z-index: auto !important;
+                margin-bottom: 35px !important;
+                padding: 0 10px;
+                width: 100%;
+                gap: 15px;
+            }
+        }
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-top: 15px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .live-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            animation: pulse 2s infinite;
+            z-index: 1000;
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+        }
+        .leave-button:hover {
+            transform: translateY(-2px);
+        }
+        .control-start-button {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .control-start-button:hover {
+            transform: translateY(-2px);
+        }
+        .rejoin-section {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .rejoin-button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        .rejoin-button:hover {
+            transform: translateY(-2px);
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .spicy-status {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .spicy-status.mixed {
+            background: rgba(243, 156, 18, 0.1);
+            border-color: #f39c12;
+            color: #f39c12;
+        }
+        .starter-display {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .my-word-display {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: 3px solid #0066cc;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .my-word-display.impostor {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border-color: #a93226;
+            animation: pulse-impostor 2s infinite;
+        }
+        @keyframes pulse-impostor {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .impostor-guess-section {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .guess-input {
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            width: 70%;
+            margin-right: 10px;
+            outline: none;
+        }
+        .guess-input:focus {
+            border-color: #e74c3c;
+        }
+        .guess-button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .guess-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .game-end-section {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .game-end-section.victory {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        .game-end-section.defeat {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        .game-end-section.impostor-win {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+        }
+        .game-end-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .game-end-word {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .lobby-button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .lobby-button:hover {
+            transform: translateY(-2px);
+        }
+        .join-form {
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            width: 70%;
+            margin-right: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #667eea;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .reveal-button {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            margin: 20px 10px;
+            font-size: 16px;
+            padding: 12px 25px;
+        }
+        .vote-button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            margin: 10px 5px;
+            font-size: 14px;
+            padding: 10px 20px;
+        }
+        .voting-section {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .vote-progress {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .vote-results {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .vote-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .vote-option {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .vote-option:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        .vote-option.selected {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .vote-option.disabled {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .players-section {
+            margin: 30px 0;
+        }
+        .players-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .player-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 15px;
+            border-radius: 15px;
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: default;
+        }
+        .player-card.current-player {
+            background: linear-gradient(135deg, #27ae60 0%, #a8e063 100%) !important;
+            color: #fff !important;
+            border: 2px solid #27ae60;
+            box-shadow: 0 0 10px #27ae6044;
+        }
+        .kick-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .kick-button:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+        .player-card:hover .kick-button {
+            display: flex;
+        }
+        .game-status {
+            font-size: 1.8em;
+            color: #27ae60;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 15px;
+            border: 2px solid #27ae60;
+        }
+        .start-hint {
+            color: #666;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        .chat-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .chat-messages {
+            flex: 1;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        .chat-message.own {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+            margin-left: 20px;
+        }
+        .chat-message.event {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            font-style: italic;
+            font-weight: bold;
+            color: #856404;
+        }
+        .chat-player {
+            font-weight: bold;
+            color: #1976d2;
+            margin-right: 5px;
+        }
+        .chat-player.event {
+            color: #856404;
+        }
+        .chat-time {
+            font-size: 0.8em;
+            color: #666;
+            float: right;
+        }
+        .chat-time.event {
+            color: #856404;
+        }
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+        .chat-send {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .chat-send:hover {
+            transform: translateY(-1px);
+        }
+        .button-row-mobile {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            width: 100%;
+            margin: 0 0 18px 0;
+        }
+        .card-corner-left, .card-corner-right {
+            position: absolute;
+            z-index: 2;
+            display: inline-block;
+            pointer-events: auto;
+            width: auto;
+            min-width: 0;
+            top: 0px;
+            left: 50px;
+            padding: 12px 18px;
+        }
+        .card-corner-right {
+            right: 24px;
+        }
+        .card-buttons-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            padding: 0 15px;
+            margin-bottom: 15px;
+        }
+        @media (min-width: 1200px) {
+            .card-buttons-row {
+                position: absolute;
+                top: 15px;
+                left: 0;
+                z-index: 2;
+                margin-bottom: 15px;
+            }
+        }
+        .chat-container.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+        .chat-container.disabled::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        .chat-container.disabled .chat-input {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+        .chat-container.disabled .chat-send {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .chat-container.disabled .chat-header {
+            color: #999;
+        }
+        .chat-container.disabled .chat-messages {
+            background: #f9f9f9;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar"></div>
+    <div class="game-layout">
+        <div class="leaderboard-sidebar" id="players-leaderboard">
+            <div class="leaderboard-title players">🏆 Player Wins</div>
+            <div id="players-leaderboard-content">
+            </div>
+            <button class="show-more-btn" id="show-more-players" style="display: none;">Mehr anzeigen</button>
+        </div>
+        <div class="container">
+            <div class="card-buttons-row">
+                <a href="/control" class="control-button">🔐 Control</a>
+                <a href="/leave_lobby" class="leave-button">🚪 Leave</a>
+            </div>
+            <div id="control-start-section" style="display: none;">
+                <a href="/start" class="control-start-button">
+                    🎮 Start Game (Control)
+                </a>
+            </div>
+            
+            <h1>🎭 Impostor Game</h1>
+            
+            <div id="rejoin-section" class="rejoin-section" style="display: none;">
+                <h3>🔄 Du kannst zum laufenden Spiel zurückkehren!</h3>
+                <p>Du warst bereits im Spiel und kannst wieder beitreten.</p>
+                <a href="/rejoin" class="rejoin-button">🎮 Spiel wieder beitreten</a>
+            </div>
+            
+            <div id="game-end-section" style="display: none;">
+                <div id="game-end-content" class="game-end-section">
+                    <div id="game-end-title" class="game-end-title">
+                    </div>
+                    <div class="game-end-word" id="game-end-word">
+                    </div>
+                    <div id="game-end-message">
+                    </div>
+                    <a href="/return_to_lobby" class="lobby-button" id="permanent-lobby-button">
+                        🏠 Neues Spiel starten
+                    </a>
+                </div>
+            </div>
+            
+            <div id="spicy-status" class="spicy-status" style="display: none;">
+                🌶️ <span id="spicy-text"></span>
+            </div>
+            
+            <div id="starter-section" style="display: none;">
+                <div class="starter-display">
+                    🎯 <span id="starter-name"></span> beginnt das Spiel!
+                </div>
+            </div>
+            
+            <div id="my-word-section" style="display: none;">
+                <h3>Dein Wort:</h3>
+                <div id="my-word-display" class="my-word-display">
+                </div>
+            </div>
+            
+            <div id="impostor-guess-section" class="impostor-guess-section" style="display: none;">
+                <h3>🎭 Impostor: Errate das Wort um zu gewinnen!</h3>
+                <div style="margin: 15px 0;">
+                    <input type="text" id="guess-input" class="guess-input" placeholder="Deine Vermutung..." maxlength="50">
+                    <button id="guess-submit" class="guess-button">Erraten</button>
+                </div>
+                <div id="guess-warning" style="font-size: 14px; color: #e74c3c; font-weight: bold;">
+                    ⚠️ Du kannst nur EINMAL raten! Bei falscher Antwort gewinnen die Spieler!
+                </div>
+            </div>
+            
+            <div id="voting-section" class="voting-section" style="display: none;">
+                <h3>🗳️ Abstimmung - Wer ist der Impostor?</h3>
+                
+                <div id="vote-progress" class="vote-progress">
+                    <span id="vote-count">0</span> von <span id="total-players">0</span> Spielern haben gevoted
+                </div>
+                
+                <div id="vote-grid" class="vote-grid">
+                </div>
+                <button id="submit-vote" class="vote-button">Stimme abgeben</button>
+                <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                    Das Voting endet automatisch, wenn alle gevoted haben
+                </div>
+            </div>
+            
+            <div id="vote-results" class="vote-results" style="display: none;">
+                <h3>📊 Abstimmungsergebnis</h3>
+                <div id="results-content">
+                </div>
+            </div>
+            
+            <div id="join-section">
+                <div class="join-form">
+                    {% if kicked_message %}
+                    <div style="background:#e67e22;color:white;padding:10px 20px;margin-bottom:15px;border-radius:8px;font-weight:bold;">
+                        {{ kicked_message }}
+                    </div>
+                    {% endif %}
+                    {% if not is_logged_in %}
+                        {% if error_message %}
+                        <div style="background:#e74c3c;color:white;padding:10px 20px;margin-bottom:15px;border-radius:8px;font-weight:bold;">
+                            {{ error_message }}
+                        </div>
+                        {% endif %}
+                        <form method="POST">
+                            <input type="hidden" name="action" value="join">
+                            <input type="text" name="name" placeholder="Dein Name..." required>
+                            <button type="submit">Beitreten</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="players-section">
+                <h2 class="players-title">Spieler (<span id="player-count">0</span>)</h2>
+                
+                <div id="start-vote-section" style="display:none;margin-bottom:20px;"></div>
+                
+                <div id="game-started-section" style="display: none;">
+                    <div class="game-status">
+                        🎮 Spiel läuft! 
+                        <br><br>
+                        <a href="/reveal" class="reveal-button" style="text-decoration: none; color: white;">
+                            👁️ Mein Wort aufdecken
+                        </a>
+                    </div>
+                </div>
+                
+                <div id="revealed-section" style="display: none;">
+                    <div class="game-status" style="color: #f39c12; border-color: #f39c12; background: rgba(243, 156, 18, 0.1);">
+                        🎮 Diskutiert und findet den Impostor!
+                        <br><br>
+                        <a href="/start_voting" class="vote-button" style="text-decoration: none; color: white;">
+                            🗳️ Abstimmung starten
+                        </a>
+                    </div>
+                </div>
+                
+                <div id="players-grid" class="players-grid">
+                </div>
+            </div>
+            
+            <div id="start-hint">
+                <div class="start-hint">
+                    Mindestens 3 Spieler benötigt zum Starten
+                </div>
+            </div>
+            
+            <div id="lobby-chat-container" class="chat-container" style="display: none;">
+                <div class="chat-header">💬 Lobby-Chat</div>
+                <div id="lobby-chat-messages" class="chat-messages">
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="lobby-chat-input" class="chat-input" placeholder="Schreibe eine Nachricht..." maxlength="200">
+                    <button id="lobby-chat-send" class="chat-send">Senden</button>
+                </div>
+                <div id="lobby-chat-disabled-message" style="display: none; text-align: center; padding: 10px; color: #999; font-style: italic; background: rgba(0,0,0,0.05); border-radius: 5px; margin-top: 10px;">
+                    💬 Tritt der Lobby bei, um zu chatten!
+                </div>
+            </div>
+            
+            <div id="chat-container" class="chat-container" style="display: none;">
+                <div class="chat-header">💬 Spiel-Chat</div>
+                <div id="chat-messages" class="chat-messages">
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Schreibe eine Nachricht..." maxlength="200">
+                    <button id="chat-send" class="chat-send">Senden</button>
+                </div>
+            </div>
+        </div>
+        <div class="leaderboard-sidebar" id="impostors-leaderboard">
+            <div class="leaderboard-title impostors">🏆 Impostor Wins</div>
+            <div id="impostors-leaderboard-content">
+            </div>
+            <button class="show-more-btn" id="show-more-impostors" style="display: none;">Mehr anzeigen</button>
+        </div>
+    </div>
+
+    <div class="mobile-leaderboard">
+        <h3 style="text-align: center; margin-bottom: 20px;">🏆 Leaderboards</h3>
+        <div class="mobile-leaderboard-grid">
+            <div>
+                <div class="leaderboard-title players">Player Wins</div>
+                <div id="mobile-players-content">
+                </div>
+                <button class="show-more-btn" id="mobile-show-more-players" style="display: none;">Mehr anzeigen</button>
+            </div>
+            <div>
+                <div class="leaderboard-title impostors">Impostor Wins</div>
+                <div id="mobile-impostors-content">
+                </div>
+                <button class="show-more-btn" id="mobile-show-more-impostors" style="display: none;">Mehr anzeigen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="kicked-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(44,62,80,0.85);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:#e67e22;color:white;padding:32px 40px;border-radius:16px;font-size:1.3em;font-weight:bold;box-shadow:0 8px 32px rgba(0,0,0,0.25);text-align:center;max-width:90vw;">
+        Du wurdest aus dem Spiel entfernt.<br>Du kannst erneut beitreten.
+      </div>
+    </div>
+
+    <script>
+        let currentPlayerName = '';
+        let selectedVote = '';
+        let hasVoted = false;
+        let isImpostor = false;
+        let isControl = false;
+        let impostorGuessUsed = false;
+        
+        let playersShowLimit = 10;
+        let impostorsShowLimit = 10;
+        let playersData = [];
+        let impostorsData = [];
+
+        let announceSpicyMode = true;
+
+        function fetchAnnounceSpicyMode(cb) {
+            $.ajax({
+                url: '/api/status',
+                method: 'GET',
+                success: function(data) {
+                    announceSpicyMode = (typeof data.announce_spicy_mode !== 'undefined') ? data.announce_spicy_mode : true;
+                    if (cb) cb();
+                }
+            });
+        }
+
+        function updateGameStatus() {
+            $.ajax({
+                url: '/api/status',
+                method: 'GET',
+                success: function(data) {
+                    announceSpicyMode = (typeof data.announce_spicy_mode !== 'undefined') ? data.announce_spicy_mode : true;
+                    $('#player-count').text(data.players.length);
+                    $('#total-players').text(data.players.length);
+                    currentPlayerName = data.player_name || '';
+                    isControl = data.is_control || false;
+                    impostorGuessUsed = data.impostor_guess_used || false;
+                    
+                    if (data.can_rejoin) {
+                        $('#rejoin-section').show();
+                    } else {
+                        $('#rejoin-section').hide();
+                    }
+                    
+                    if (isControl && data.players.length >= 3) {
+                        $('#control-start-section').show();
+                    } else {
+                        $('#control-start-section').hide();
+                    }
+                    
+                    updateSpicyStatus(data.force_spicy, data.spicy_mode);
+                    updatePlayersGrid(data.players);
+                    updateStartVoteSection();
+                    
+                    if (data.game_ended) {
+                        showGameEnd(data.vote_results);
+                        updateLeaderboard();
+                        return;
+                    } else {
+                        $('#game-end-section').hide();
+                    }
+                    
+                    if (data.current_starter && data.game_started) {
+                        $('#starter-name').text(data.current_starter);
+                        $('#starter-section').show();
+                    } else {
+                        $('#starter-section').hide();
+                    }
+                    
+                    if (data.revealed && data.player_word && data.is_logged_in) {
+                        showMyWord(data.player_word);
+                        
+                        if (data.player_word.includes('IMPOSTOR')) {
+                            isImpostor = true;
+                            $('#impostor-guess-section').show();
+                            
+                            if (impostorGuessUsed) {
+                                $('#guess-input').prop('disabled', true);
+                                $('#guess-submit').prop('disabled', true).text('Bereits geraten');
+                                $('#guess-warning').text('⚠️ Du hast bereits geraten!');
+                            }
+                        } else {
+                            isImpostor = false;
+                            $('#impostor-guess-section').hide();
+                        }
+                    } else {
+                        $('#my-word-section').hide();
+                        $('#impostor-guess-section').hide();
+                    }
+                    
+                    if (data.voting_active && data.is_logged_in) {
+                        showVotingSection(data.players, data.votes, data.all_voted);
+                        updateVoteProgress(Object.keys(data.votes).length, data.players.length);
+                        
+                        if (Object.keys(data.votes).length === 0) {
+                            hasVoted = false;
+                        }
+                    } else {
+                        $('#voting-section').hide();
+                    }
+                    
+                    if (data.vote_results && Object.keys(data.vote_results).length > 0 && !data.game_ended) {
+                        showVoteResults(data.vote_results);
+                    } else if (!data.game_ended) {
+                        $('#vote-results').hide();
+                    }
+                    
+                    if (data.game_started && !data.game_ended) {
+                        $('#join-section').hide();
+                        $('#start-hint').hide();
+                        $('#lobby-chat-container').hide();
+                        $('#chat-container').show();
+                        
+                        if (data.is_logged_in) {
+                            if (data.revealed && !data.voting_active) {
+                                $('#game-started-section').hide();
+                                $('#revealed-section').show();
+                            } else if (!data.revealed) {
+                                $('#game-started-section').show();
+                                $('#revealed-section').hide();
+                            } else {
+                                $('#game-started-section').hide();
+                                $('#revealed-section').hide();
+                            }
+                        } else {
+                            $('#game-started-section').hide();
+                            $('#revealed-section').hide();
+                        }
+                    } else if (!data.game_ended) {
+                        if (!data.is_logged_in) {
+                            $('#join-section').show();
+                            $('#lobby-chat-container').addClass('disabled');
+                            $('#lobby-chat-disabled-message').show();
+                            $('#lobby-chat-input').attr('placeholder', 'Tritt der Lobby bei, um zu chatten...');
+                        } else {
+                            $('#join-section').hide();
+                            $('#lobby-chat-container').removeClass('disabled');
+                            $('#lobby-chat-disabled-message').hide();
+                            $('#lobby-chat-input').attr('placeholder', 'Schreibe eine Nachricht...');
+                        }
+                        $('#start-hint').show();
+                        $('#game-started-section').hide();
+                        $('#revealed-section').hide();
+                        $('#chat-container').hide();
+                        $('#lobby-chat-container').show();
+                    }
+                    
+                    if (data.game_started && !data.game_ended) {
+                        updateChat(data.chat_messages, 'game');
+                    } else if (!data.game_ended) {
+                        updateChat(data.chat_messages, 'lobby');
+                    }
+                },
+                error: function() {
+                    console.log('Fehler beim Laden der Live-Updates');
+                }
+            });
+        }
+
+        function updateLeaderboard() {
+            $.ajax({
+                url: '/api/leaderboard',
+                method: 'GET',
+                success: function(data) {
+                    playersData = data.players;
+                    impostorsData = data.impostors;
+                    
+                    renderLeaderboard('players', playersData, playersShowLimit);
+                    renderLeaderboard('impostors', impostorsData, impostorsShowLimit);
+                },
+                error: function() {
+                    console.log('Fehler beim Laden des Leaderboards');
+                }
+            });
+        }
+
+        function renderLeaderboard(type, data, limit) {
+            const contentId = type === 'players' ? 'players-leaderboard-content' : 'impostors-leaderboard-content';
+            const mobileContentId = type === 'players' ? 'mobile-players-content' : 'mobile-impostors-content';
+            const showMoreId = type === 'players' ? 'show-more-players' : 'show-more-impostors';
+            const mobileShowMoreId = type === 'players' ? 'mobile-show-more-players' : 'mobile-show-more-impostors';
+            
+            let html = '';
+            const displayData = data.slice(0, limit);
+            
+            displayData.forEach((entry, index) => {
+                let topClass = '';
+                let trophy = '🏆';
+                
+                if (index === 0) {
+                    topClass = 'top-1';
+                    trophy = '🥇';
+                } else if (index === 1) {
+                    topClass = 'top-2';
+                    trophy = '🥈';
+                } else if (index === 2) {
+                    topClass = 'top-3';
+                    trophy = '🥉';
+                }
+                
+                html += `
+                    <div class="leaderboard-entry ${topClass}">
+                        <span class="leaderboard-name">${entry.name}</span>
+                        <span class="leaderboard-wins">
+                            <span class="trophy">${trophy}</span>
+                            ${entry.wins}
+                        </span>
+                    </div>
+                `;
+            });
+            
+            $('#' + contentId).html(html);
+            
+            $('#' + mobileContentId).html(html);
+            
+            if (data.length > limit) {
+                $('#' + showMoreId).show();
+                $('#' + mobileShowMoreId).show();
+            } else {
+                $('#' + showMoreId).hide();
+                $('#' + mobileShowMoreId).hide();
+            }
+        }
+
+        $('#show-more-players, #mobile-show-more-players').click(function() {
+            playersShowLimit += 10;
+            renderLeaderboard('players', playersData, playersShowLimit);
+        });
+
+        $('#show-more-impostors, #mobile-show-more-impostors').click(function() {
+            impostorsShowLimit += 10;
+            renderLeaderboard('impostors', impostorsData, impostorsShowLimit);
+        });
+        
+        function showGameEnd(voteResults) {
+            $('#game-end-section').show();
+            
+            $('#spicy-status').hide();
+            $('#starter-section').hide();
+            $('#my-word-section').hide();
+            $('#impostor-guess-section').hide();
+            $('#voting-section').hide();
+            $('#vote-results').hide();
+            $('#join-section').hide();
+            $('#game-started-section').hide();
+            $('#revealed-section').hide();
+            $('#players-section').hide();
+            $('#chat-container').hide();
+            $('#lobby-chat-container').hide();
+            $('#start-hint').hide();
+            
+            let endContent = $('#game-end-content');
+            let endTitle = $('#game-end-title');
+            let endWord = $('#game-end-word');
+            let endMessage = $('#game-end-message');
+            
+            if (voteResults.impostor_won) {
+                endContent.removeClass('victory defeat').addClass('impostor-win');
+                endTitle.text('🎭 IMPOSTOR GEWINNT! 🎭');
+                endWord.text(voteResults.winning_word);
+                endMessage.html(`<strong>${voteResults.impostor}</strong> hat das Wort erraten!<br>
+                               <span style="color: #a7ff83; font-weight: bold; text-shadow: 1px 1px 2px #333;">Geraten: "${voteResults.guessed_word}"</span><br>
+                               Der Impostor hat gewonnen!`);
+            } else if (voteResults.impostor_failed) {
+                endContent.removeClass('defeat impostor-win').addClass('victory');
+                endTitle.text('🎉 SPIELER GEWINNEN! 🎉');
+                endWord.text(voteResults.winning_word);
+                endMessage.html(`<strong>${voteResults.impostor}</strong> hat falsch geraten!<br>
+                               <span style="color: #e74c3c; font-weight: bold; text-shadow: 1px 1px 2px #333;">Geraten: "${voteResults.guessed_word}"</span><br>
+                               <span style="color: #a7ff83; font-weight: bold; text-shadow: 1px 1px 2px #333;">Richtig war: "${voteResults.actual_word}"</span><br>
+                               Die Spieler haben gewonnen!`);
+            } else if (voteResults.is_impostor) {
+                endContent.removeClass('defeat impostor-win').addClass('victory');
+                endTitle.text('🎉 IMPOSTOR GEFUNDEN! 🎉');
+                endWord.text(voteResults.winning_word);
+                endMessage.html(`<strong>${voteResults.voted_out}</strong> war der Impostor!<br>Die Spieler haben gewonnen!`);
+            } else {
+                endContent.removeClass('victory impostor-win').addClass('defeat');
+                endTitle.text('😈 IMPOSTOR GEWINNT! 😈');
+                endWord.text(voteResults.winning_word);
+                endMessage.html(`<strong>${voteResults.voted_out}</strong> war unschuldig!<br>Der Impostor hat gewonnen!`);
+            }
+        }
+        
+        function updateVoteProgress(votedCount, totalPlayers) {
+            $('#vote-count').text(votedCount);
+            $('#total-players').text(totalPlayers);
+            
+            if (votedCount >= totalPlayers) {
+                $('#vote-progress').html('<strong>✅ Alle haben gevoted - Auswertung läuft...</strong>');
+            }
+        }
+        
+        function updateSpicyStatus(forceSpicy, spicyMode) {
+            if (!announceSpicyMode) {
+                $('#spicy-status').hide();
+                return;
+            }
+            if (forceSpicy) {
+                $('#spicy-status').removeClass('mixed').addClass('spicy-status').show();
+                $('#spicy-text').text('NUR SPICY WÖRTER 🔥');
+            } else if (spicyMode) {
+                $('#spicy-status').removeClass('spicy-status').addClass('spicy-status mixed').show();
+                $('#spicy-text').text('NORMAL + SPICY WÖRTER');
+            } else {
+                $('#spicy-status').hide();
+            }
+        }
+        
+        function showMyWord(playerWord) {
+            $('#my-word-section').show();
+            let wordDisplay = $('#my-word-display');
+            
+            if (playerWord.includes('IMPOSTOR')) {
+                wordDisplay.addClass('impostor').text('🎭 IMPOSTOR');
+            } else {
+                wordDisplay.removeClass('impostor').text(playerWord.replace('Dein Wort: ', ''));
+            }
+        }
+        
+        function showVotingSection(players, votes, allVoted) {
+            $('#voting-section').show();
+            let html = '';
+            
+            players.forEach(function(player) {
+                if (player !== currentPlayerName) {
+                    let selectedClass = selectedVote === player ? 'selected' : '';
+                    let disabledClass = (hasVoted || allVoted) ? 'disabled' : '';
+                    html += `<div class="vote-option ${selectedClass} ${disabledClass}" data-player="${player}">${player}</div>`;
+                }
+            });
+            
+            $('#vote-grid').html(html);
+            
+            if (!hasVoted && !allVoted) {
+                $('.vote-option:not(.disabled)').click(function() {
+                    $('.vote-option').removeClass('selected');
+                    $(this).addClass('selected');
+                    selectedVote = $(this).data('player');
+                });
+            }
+            
+            if (hasVoted || allVoted) {
+                $('#submit-vote').prop('disabled', true).text('Stimme abgegeben');
+            } else {
+                $('#submit-vote').prop('disabled', false).text('Stimme abgeben');
+            }
+        }
+        
+        function showVoteResults(results) {
+            $('#vote-results').show();
+            let html = '';
+            
+            if (results.tie) {
+                html = `<p><strong>Gleichstand!</strong> Folgende Spieler haben gleich viele Stimmen erhalten:</p>
+                       <p>${results.tied_players.join(', ')}</p>
+                       <p>Das Spiel geht weiter!</p>`;
+            } else if (results.no_votes) {
+                html = '<p>Keine Stimmen abgegeben. Das Spiel geht weiter!</p>';
+            } else if (results.voted_out && !results.game_ended) {
+                let resultText = results.is_impostor ? 
+                    `<span style="color: #e74c3c;">🎭 ${results.voted_out} war der IMPOSTOR! Ihr habt gewonnen!</span>` :
+                    `<span style="color: #3498db;">😇 ${results.voted_out} war UNSCHULDIG! Der Impostor ist noch da!</span>`;
+                
+                html = `<p><strong>${results.voted_out}</strong> wurde rausgewählt!</p>
+                       <p>${resultText}</p>`;
+                
+                html += '<h4>Stimmenverteilung:</h4><ul>';
+                for (let [player, count] of Object.entries(results.votes)) {
+                    html += `<li>${player}: ${count} Stimme(n)</li>`;
+                }
+                html += '</ul>';
+            }
+            
+            $('#results-content').html(html);
+        }
+        
+        function updatePlayersGrid(players) {
+            let html = '';
+            players.forEach(function(player) {
+                let kickButton = '';
+                let isCurrent = player === currentPlayerName;
+                let playerLabel = isCurrent ? player + ' <span style="font-size:0.95em;">(Du)</span>' : player;
+                let extraClass = isCurrent ? ' current-player' : '';
+                if (isControl && !isCurrent) {
+                    kickButton = `<button class="kick-button" onclick="kickPlayer('${player}')" title="Spieler kicken">×</button>`;
+                }
+                html += `<div class="player-card${extraClass}">${playerLabel}${kickButton}</div>`;
+            });
+            $('#players-grid').html(html);
+        }
+        
+        function updateChat(messages, chatType) {
+            let html = '';
+            messages.forEach(function(msg) {
+                let isOwn = msg.player === currentPlayerName;
+                let isEvent = msg.is_event || msg.player === 'SYSTEM';
+                let messageClass = isOwn ? 'chat-message own' : (isEvent ? 'chat-message event' : 'chat-message');
+                let playerClass = isEvent ? 'chat-player event' : 'chat-player';
+                let timeClass = isEvent ? 'chat-time event' : 'chat-time';
+                
+                if (isEvent) {
+                    html += `
+                        <div class="${messageClass}">
+                            <span class="${timeClass}">${msg.timestamp}</span>
+                            ${msg.message}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="${messageClass}">
+                            <span class="${timeClass}">${msg.timestamp}</span>
+                            <span class="${playerClass}">${msg.player}:</span>
+                            ${msg.message}
+                        </div>
+                    `;
+                }
+            });
+            
+            let chatContainer = chatType === 'lobby' ? $('#lobby-chat-messages') : $('#chat-messages');
+            let wasAtBottom = chatContainer[0].scrollHeight - chatContainer.scrollTop() <= chatContainer.outerHeight() + 50;
+            
+            chatContainer.html(html);
+            
+            if (wasAtBottom) {
+                chatContainer.scrollTop(chatContainer[0].scrollHeight);
+            }
+        }
+        
+        function sendMessage() {
+            let message = $('#chat-input').val().trim();
+            if (message) {
+                $.post('/send_message', {message: message}, function(data) {
+                    if (data.success) {
+                        $('#chat-input').val('');
+                    }
+                });
+            }
+        }
+        
+        function sendLobbyMessage() {
+            // Don't send if not logged in
+            if (!currentPlayerName) {
+                return;
+            }
+            
+            let message = $('#lobby-chat-input').val().trim();
+            if (message) {
+                $.post('/send_message', {message: message}, function(data) {
+                    if (data.success) {
+                        $('#lobby-chat-input').val('');
+                    }
+                });
+            }
+        }
+        
+        function submitVote() {
+            if (selectedVote && !hasVoted) {
+                $.post('/vote', {voted_player: selectedVote}, function(data) {
+                    if (data.success) {
+                        hasVoted = true;
+                        $('#submit-vote').prop('disabled', true).text('Stimme abgegeben');
+                        $('.vote-option').addClass('disabled');
+                    }
+                });
+            } else if (hasVoted) {
+                alert('Du hast bereits gevoted!');
+            } else {
+                alert('Bitte wähle einen Spieler aus!');
+            }
+        }
+        
+        function submitGuess() {
+            if (!isImpostor) {
+                alert('Nur der Impostor kann das Wort erraten!');
+                return;
+            }
+            
+            let guessedWord = $('#guess-input').val().trim();
+            if (!guessedWord) {
+                alert('Bitte gib ein Wort ein!');
+                return;
+            }
+            
+            $.post('/guess_word', {guessed_word: guessedWord}, function(data) {
+                if (data.success) {
+                    if (data.correct) {
+                        alert('🎉 ' + data.message);
+                        $('#guess-input').val('').prop('disabled', true);
+                        $('#guess-submit').prop('disabled', true).text('Bereits geraten');
+                        $('#guess-warning').text('⚠️ Du hast bereits geraten!');
+                    } else {
+                        alert('❌ ' + data.message);
+                        $('#guess-input').val('').prop('disabled', true);
+                        $('#guess-submit').prop('disabled', true).text('Bereits geraten');
+                        $('#guess-warning').text('⚠️ Du hast bereits geraten!');
+                    }
+                } else {
+                    alert('Fehler: ' + data.error);
+                }
+            });
+        }
+        
+        $('#chat-send').click(sendMessage);
+        $('#chat-input').keypress(function(e) {
+            if (e.which === 13) {
+                sendMessage();
+            }
+        });
+        
+        $('#lobby-chat-send').click(sendLobbyMessage);
+        $('#lobby-chat-input').keypress(function(e) {
+            if (e.which === 13) {
+                sendLobbyMessage();
+            }
+        });
+        
+        $('#submit-vote').click(submitVote);
+        
+        $('#guess-submit').click(submitGuess);
+        $('#guess-input').keypress(function(e) {
+            if (e.which === 13) {
+                submitGuess();
+            }
+        });
+        
+        function kickPlayer(playerName) {
+            if (confirm(`Spieler ${playerName} wirklich kicken?`)) {
+                $.post('/kick_player', {player_name: playerName}, function(data) {
+                    if (data.success) {
+                        alert(data.message);
+                        updateGameStatus();
+                    } else {
+                        alert('Fehler: ' + data.error);
+                    }
+                });
+            }
+        }
+        
+        setInterval(updateGameStatus, 2000);
+        
+        setInterval(updateLeaderboard, 10000);
+        
+        $(document).ready(function() {
+            updateGameStatus();
+            updateLeaderboard();
+        });
+
+        function updateStartVoteSection() {
+            $.get('/api/start_votes', function(data) {
+                if (!data.game_started && data.players.length >= 3 && currentPlayerName && data.players.includes(currentPlayerName)) {
+                    let alreadyVoted = data.votes.includes(currentPlayerName);
+                    let voteCount = data.votes.length;
+                    let total = data.players.length;
+                    let buttonHtml = '';
+                    if (!alreadyVoted) {
+                        buttonHtml = `<button id="start-vote-btn" class="vote-button" style="margin-top:10px;">🟢 Für Spielstart stimmen</button>`;
+                    } else {
+                        buttonHtml = `<span style="color:#27ae60;font-weight:bold;">Du hast für den Start gestimmt!</span>`;
+                    }
+                    $('#start-vote-section').html(`
+                        <div style="background:#f8f9fa;padding:12px 18px;border-radius:10px;border:1.5px solid #27ae60;max-width:400px;margin:0 auto 10px auto;">
+                            <b>Abstimmung: Spiel starten</b><br>
+                            <span style="color:#27ae60;">${voteCount} / ${total} Spieler haben für den Start gestimmt.</span><br>
+                            ${buttonHtml}
+                        </div>
+                    `).show();
+                    if (!alreadyVoted) {
+                        $('#start-vote-btn').off('click').on('click', function() {
+                            $.post('/start_vote', function(resp) {
+                                updateStartVoteSection();
+                            });
+                        });
+                    }
+                } else {
+                    $('#start-vote-section').hide();
+                }
+            });
+        }
+
+        $('.control-start-button').css('text-decoration', 'none');
+
+        function checkIfKicked() {
+            $.get('/api/am_i_kicked', function(data) {
+                if (data.was_kicked) {
+                    $('#kicked-modal').fadeIn(200);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1200);
+                }
+            });
+        }
+        setInterval(checkIfKicked, 2000);
+    </script>
+</body>
+</html>
