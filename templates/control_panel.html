@@ -247,6 +247,175 @@
             /* pointer-events: none; */
             /* user-select: none; */
         }
+        .leaderboard-status-row {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 10px;
+            font-size: 1em;
+            align-items: center;
+        }
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            font-size: 1.05em;
+        }
+        .file-status .filename {
+            font-size: 0.98em;
+            color: #333;
+            margin-left: 8px;
+            font-weight: 400;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 2px 8px;
+        }
+        .file-status.present {
+            color: #27ae60;
+        }
+        .file-status.missing {
+            color: #e74c3c;
+        }
+        .file-status .status-icon {
+            font-size: 1.2em;
+        }
+        .leaderboard-backup-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+        .leaderboard-upload-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .leaderboard-upload-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .action-btn[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .leaderboard-backup-card {
+            grid-column: span 2;
+        }
+        @media (max-width: 900px) {
+            .leaderboard-backup-card {
+                grid-column: span 1;
+            }
+        }
+        .custom-file-input {
+            display: none;
+        }
+        .custom-file-label {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: #fff;
+            padding: 7px 16px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+            display: inline-block;
+        }
+        .custom-file-label:hover {
+            background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%);
+        }
+        .selected-filename {
+            font-size: 0.98em;
+            color: #333;
+            margin-left: 6px;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .action-btn.leaderboard {
+            font-size: 1em;
+            padding: 8px 0;
+            min-width: 0;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .backup-list {
+            margin: 10px 0 18px 0;
+            padding: 0;
+            list-style: none;
+        }
+        .backup-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            border-radius: 7px;
+            padding: 6px 10px;
+        }
+        .backup-filename {
+            font-size: 0.98em;
+            color: #333;
+            font-family: monospace;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .backup-action-btn {
+            font-size: 0.95em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .backup-action-btn.restore {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        .backup-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .collapsible-section {
+            display: none;
+            margin-bottom: 12px;
+        }
+        .collapsible-section.open {
+            display: block;
+        }
+        .collapsible-toggle-btn {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .collapsible-toggle-btn:active {
+            background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%);
+        }
+        .leaderboard-download-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .leaderboard-download-label {
+            font-size: 0.98em;
+            color: #333;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -321,6 +490,33 @@
                 <button type="submit" class="settings-save-btn" style="padding:8px 18px;">Ändern</button>
             </form>
             <div id="password-status" style="margin-top:8px;font-size:0.98em;"></div>
+        </div>
+        <!-- Leaderboard Backup/Restore Card -->
+        <div class="card leaderboard-backup-card">
+            <div class="card-title">🏆 Leaderboard Backup & Restore</div>
+            <div class="leaderboard-status-row" id="leaderboard-status-row">
+                <span class="file-status" id="status-leaderboard-json"><span class='status-icon'>⏳</span> Leaderboard: ...</span>
+                <span class="file-status" id="status-leaderboard-bckp"><span class='status-icon'>⏳</span> Backup: ...</span>
+            </div>
+            <button class="action-btn leaderboard" id="backup-leaderboard-btn" style="margin-bottom:10px;width:100%;">Backup Leaderboard</button>
+            <button class="collapsible-toggle-btn" id="toggle-backup-list-btn">Backups & Downloads anzeigen</button>
+            <div class="collapsible-section" id="collapsible-backup-list">
+                <div class="leaderboard-download-row">
+                    <span class="leaderboard-download-label">Leaderboard:</span>
+                    <span class="filename">leaderboard.json</span>
+                    <button class="backup-action-btn" id="download-leaderboard-btn">Download</button>
+                </div>
+                <ul class="backup-list" id="backup-list"></ul>
+            </div>
+            <div class="leaderboard-upload-row">
+                <label for="upload-leaderboard-file" class="custom-file-label">Datei auswählen</label>
+                <span class="selected-filename" id="selected-leaderboard-filename">Keine Datei gewählt</span>
+                <button class="action-btn leaderboard" id="upload-leaderboard-btn" style="width:auto;min-width:unset;padding:7px 16px;">Als Leaderboard hochladen</button>
+            </div>
+            <form id="upload-leaderboard-form" style="display:none;">
+                <input type="file" id="upload-leaderboard-file" class="custom-file-input" accept="application/json">
+            </form>
+            <div id="leaderboard-backup-status" style="margin-top:10px;font-size:0.98em;"></div>
         </div>
     </div>
     <script>
@@ -532,7 +728,208 @@
                 overlay.style.display = 'none';
             });
         }
+        // Collapsible backup list logic
+        const toggleBackupListBtn = document.getElementById('toggle-backup-list-btn');
+        const collapsibleBackupList = document.getElementById('collapsible-backup-list');
+        if (toggleBackupListBtn && collapsibleBackupList) {
+            toggleBackupListBtn.onclick = function() {
+                collapsibleBackupList.classList.toggle('open');
+                toggleBackupListBtn.textContent = collapsibleBackupList.classList.contains('open') ? 'Backups & Downloads ausblenden' : 'Backups & Downloads anzeigen';
+            };
+        }
+        // Backup Leaderboard button
+        const backupLeaderboardBtn = document.getElementById('backup-leaderboard-btn');
+        if (backupLeaderboardBtn) {
+            backupLeaderboardBtn.onclick = function() {
+                const status = document.getElementById('leaderboard-backup-status');
+                fetch('/api/create_leaderboard_backup', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            status.textContent = '✅ Backup erfolgreich erstellt: ' + data.backup;
+                            status.style.color = '#27ae60';
+                            updateLeaderboardFileStatus();
+                        } else {
+                            status.textContent = '❌ ' + (data.error || 'Fehler beim Backup');
+                            status.style.color = '#e74c3c';
+                        }
+                    })
+                    .catch(() => {
+                        status.textContent = '❌ Fehler beim Backup.';
+                        status.style.color = '#e74c3c';
+                    });
+            };
+        }
     });
+
+    // --- Leaderboard file status ---
+    let leaderboardExists = false;
+    let backupExists = false;
+    let latestBackupFile = null;
+    function updateLeaderboardFileStatus() {
+        fetch('/api/backup_leaderboard').then(r => {
+            leaderboardExists = (r.status === 200);
+            document.getElementById('status-leaderboard-json').innerHTML = `<span class='status-icon'>${leaderboardExists ? '✅' : '❌'}</span> Leaderboard: ${leaderboardExists ? 'Vorhanden' : 'Fehlt'}<span class='filename'>leaderboard.json</span>`;
+            document.getElementById('status-leaderboard-json').className = 'file-status ' + (leaderboardExists ? 'present' : 'missing');
+            document.getElementById('download-leaderboard-btn').disabled = !leaderboardExists;
+        });
+        fetch('/api/list_leaderboard_backups').then(r => r.json()).then(data => {
+            const backupList = document.getElementById('backup-list');
+            backupList.innerHTML = '';
+            if (data.success && data.backups.length > 0) {
+                backupExists = true;
+                latestBackupFile = data.backups[0];
+                document.getElementById('status-leaderboard-bckp').innerHTML = `<span class='status-icon'>✅</span> Backup: Vorhanden<span class='filename'>${latestBackupFile}</span>`;
+                // List all backups
+                data.backups.forEach(function(filename) {
+                    const li = document.createElement('li');
+                    li.className = 'backup-list-item';
+                    li.innerHTML = `<span class='backup-filename'>${filename}</span>` +
+                        `<button class='backup-action-btn' onclick="window.open('/api/download_leaderboard_backup_file?name=${encodeURIComponent(filename)}','_blank')">Download</button>` +
+                        `<button class='backup-action-btn restore' onclick="restoreBackup('${filename}')">Als Leaderboard laden</button>`;
+                    backupList.appendChild(li);
+                });
+            } else {
+                backupExists = false;
+                latestBackupFile = null;
+                document.getElementById('status-leaderboard-bckp').innerHTML = `<span class='status-icon'>❌</span> Backup: Kein Backup vorhanden`;
+            }
+        });
+    }
+    updateLeaderboardFileStatus();
+    setInterval(updateLeaderboardFileStatus, 10000);
+
+    // Custom file input logic
+    const fileInput = document.getElementById('upload-leaderboard-file');
+    const fileLabel = document.querySelector('.custom-file-label');
+    const fileNameSpan = document.getElementById('selected-leaderboard-filename');
+    const uploadActions = document.getElementById('leaderboard-upload-actions');
+    fileLabel.onclick = function() { fileInput.click(); };
+    fileInput.onchange = function() {
+        if (fileInput.files.length) {
+            fileNameSpan.textContent = fileInput.files[0].name;
+            document.getElementById('upload-leaderboard-btn').disabled = false;
+        } else {
+            fileNameSpan.textContent = 'Keine Datei gewählt';
+            document.getElementById('upload-leaderboard-btn').disabled = true;
+        }
+    };
+    document.getElementById('upload-leaderboard-btn').disabled = true;
+    document.getElementById('download-leaderboard-btn').onclick = function() {
+        if (leaderboardExists) window.open('/api/backup_leaderboard', '_blank');
+    };
+    document.getElementById('upload-leaderboard-btn').onclick = function() {
+        uploadLeaderboardFile('/api/upload_leaderboard');
+    };
+    document.getElementById('load-backup-btn').onclick = function() {
+        if (!backupExists || !latestBackupFile) return;
+        const status = document.getElementById('leaderboard-backup-status');
+        fetch('/api/upload_leaderboard', {
+            method: 'POST',
+            body: (() => {
+                const formData = new FormData();
+                return fetch('/api/download_leaderboard_backup_file?name=' + encodeURIComponent(latestBackupFile))
+                    .then(r => r.blob())
+                    .then(blob => { formData.append('file', blob, latestBackupFile); return formData; });
+            })()
+        }).then(async r => r.json()).then(data => {
+            if (data.success) {
+                status.textContent = '✅ Backup erfolgreich als Leaderboard geladen!';
+                status.style.color = '#27ae60';
+                updateLeaderboardFileStatus();
+            } else {
+                status.textContent = '❌ ' + (data.error || 'Fehler beim Laden des Backups');
+                status.style.color = '#e74c3c';
+            }
+        }).catch(() => {
+            status.textContent = '❌ Fehler beim Laden des Backups.';
+            status.style.color = '#e74c3c';
+        });
+    };
+    function uploadLeaderboardFile(endpoint) {
+        const status = document.getElementById('leaderboard-backup-status');
+        if (!fileInput.files.length) {
+            status.textContent = '❌ Bitte wähle eine Datei aus.';
+            status.style.color = '#e74c3c';
+            return;
+        }
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        fetch(endpoint, {
+            method: 'POST',
+            body: formData
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                status.textContent = '✅ Datei erfolgreich hochgeladen!';
+                status.style.color = '#27ae60';
+                fileInput.value = '';
+                fileNameSpan.textContent = 'Keine Datei gewählt';
+                document.getElementById('upload-leaderboard-btn').disabled = true;
+                updateLeaderboardFileStatus();
+            } else {
+                status.textContent = '❌ ' + (data.error || 'Fehler beim Hochladen');
+                status.style.color = '#e74c3c';
+            }
+        }).catch(() => {
+            status.textContent = '❌ Fehler beim Hochladen.';
+            status.style.color = '#e74c3c';
+        });
+    }
+    function restoreBackup(filename) {
+        const status = document.getElementById('leaderboard-backup-status');
+        fetch('/api/download_leaderboard_backup_file?name=' + encodeURIComponent(filename))
+            .then(r => r.blob())
+            .then(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, filename);
+                return fetch('/api/upload_leaderboard', {
+                    method: 'POST',
+                    body: formData
+                });
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    status.textContent = '✅ Backup erfolgreich als Leaderboard geladen!';
+                    status.style.color = '#27ae60';
+                    updateLeaderboardFileStatus();
+                } else {
+                    status.textContent = '❌ ' + (data.error || 'Fehler beim Laden des Backups');
+                    status.style.color = '#e74c3c';
+                }
+            })
+            .catch(() => {
+                status.textContent = '❌ Fehler beim Laden des Backups.';
+                status.style.color = '#e74c3c';
+            });
+    }
+    document.getElementById('backup-leaderboard-btn').onclick = function() {
+        const status = document.getElementById('leaderboard-backup-status');
+        fetch('/api/create_leaderboard_backup', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    status.textContent = '✅ Backup erfolgreich erstellt: ' + data.backup;
+                    status.style.color = '#27ae60';
+                    updateLeaderboardFileStatus();
+                } else {
+                    status.textContent = '❌ ' + (data.error || 'Fehler beim Backup');
+                    status.style.color = '#e74c3c';
+                }
+            })
+            .catch(() => {
+                status.textContent = '❌ Fehler beim Backup.';
+                status.style.color = '#e74c3c';
+            });
+    };
+
+    // Collapsible backup list logic
+    const toggleBackupListBtn = document.getElementById('toggle-backup-list-btn');
+    const collapsibleBackupList = document.getElementById('collapsible-backup-list');
+    toggleBackupListBtn.onclick = function() {
+        collapsibleBackupList.classList.toggle('open');
+        toggleBackupListBtn.textContent = collapsibleBackupList.classList.contains('open') ? 'Backups & Downloads ausblenden' : 'Backups & Downloads anzeigen';
+    };
     </script>
 </body>
 </html>

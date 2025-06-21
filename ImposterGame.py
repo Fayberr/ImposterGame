@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response, send_file, send_from_directory
 import random
 import threading
 import webbrowser
@@ -11,11 +11,13 @@ import time
 import json
 from datetime import datetime, timedelta
 import re
+import shutil
+import glob
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
-CONTROL_PASSWORD = "admineger"
+CONTROL_PASSWORD = "test"
 CONTROL_USERS = {"Control", "Admin"}
 
 LEADERBOARD_FILE = 'leaderboard.json'
@@ -50,6 +52,8 @@ CLEANUP_INTERVAL = 6
 announce_spicy_mode = True
 
 kicked_sessions = set()
+
+BACKUP_PATTERN = 'leaderboard_bckp_*.json'
 
 def load_leaderboard():
     """Lädt das Leaderboard aus der JSON-Datei"""
@@ -1059,6 +1063,109 @@ def api_am_i_kicked():
     session_id = session.get('session_id')
     is_kicked = session_id in kicked_sessions if session_id else False
     return jsonify({'was_kicked': is_kicked})
+
+@app.route('/api/backup_leaderboard')
+def api_backup_leaderboard():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    if os.path.exists(LEADERBOARD_FILE):
+        return send_file(LEADERBOARD_FILE, as_attachment=True, download_name='leaderboard.json')
+    else:
+        return jsonify({'success': False, 'error': 'No leaderboard file found'}), 404
+
+@app.route('/api/load_leaderboard_backup', methods=['POST'])
+def api_load_leaderboard_backup():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    backup_file = 'leaderboard_bckp'
+    if os.path.exists(backup_file):
+        shutil.copyfile(backup_file, LEADERBOARD_FILE)
+        load_leaderboard()
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'No backup file found'}), 404
+
+@app.route('/api/upload_leaderboard', methods=['POST'])
+def api_upload_leaderboard():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+    file = request.files['file']
+    try:
+        data = file.read()
+        json_data = json.loads(data)
+        # Validate leaderboard format
+        if (not isinstance(json_data, dict) or
+            'players' not in json_data or 'impostors' not in json_data or
+            not isinstance(json_data['players'], dict) or not isinstance(json_data['impostors'], dict)):
+            return jsonify({'success': False, 'error': 'Invalid leaderboard format'}), 400
+        with open(LEADERBOARD_FILE, 'wb') as f:
+            f.write(data)
+        load_leaderboard()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Invalid file: {e}'}), 400
+
+@app.route('/api/download_leaderboard_backup')
+def api_download_leaderboard_backup():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    backup_file = 'leaderboard_bckp'
+    if os.path.exists(backup_file):
+        return send_file(backup_file, as_attachment=True, download_name='leaderboard_bckp.json')
+    else:
+        return jsonify({'success': False, 'error': 'No backup file found'}), 404
+
+@app.route('/api/upload_leaderboard_file', methods=['POST'])
+def api_upload_leaderboard_file():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+    file = request.files['file']
+    try:
+        data = file.read()
+        json_data = json.loads(data)
+        # Validate leaderboard format
+        if (not isinstance(json_data, dict) or
+            'players' not in json_data or 'impostors' not in json_data or
+            not isinstance(json_data['players'], dict) or not isinstance(json_data['impostors'], dict)):
+            return jsonify({'success': False, 'error': 'Invalid leaderboard format'}), 400
+        with open(LEADERBOARD_FILE, 'wb') as f:
+            f.write(data)
+        load_leaderboard()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Invalid file: {e}'}), 400
+
+@app.route('/api/create_leaderboard_backup', methods=['POST'])
+def api_create_leaderboard_backup():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    if not os.path.exists(LEADERBOARD_FILE):
+        return jsonify({'success': False, 'error': 'No leaderboard file found'}), 404
+    now = datetime.now()
+    ts = now.strftime('%d-%H-%M')
+    backup_name = f'leaderboard_bckp_{ts}.json'
+    shutil.copyfile(LEADERBOARD_FILE, backup_name)
+    return jsonify({'success': True, 'backup': backup_name})
+
+@app.route('/api/list_leaderboard_backups')
+def api_list_leaderboard_backups():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    files = sorted(glob.glob(BACKUP_PATTERN), reverse=True)
+    return jsonify({'success': True, 'backups': files})
+
+@app.route('/api/download_leaderboard_backup_file')
+def api_download_leaderboard_backup_file():
+    if not is_control_user():
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+    name = request.args.get('name')
+    if not name or not os.path.exists(name) or not name.startswith('leaderboard_bckp_') or not name.endswith('.json'):
+        return jsonify({'success': False, 'error': 'Invalid backup file'}), 400
+    return send_from_directory('.', name, as_attachment=True)
 
 def add_game_event(event_type, message, emoji="🎮"):
     """Adds a game event message with special styling"""
