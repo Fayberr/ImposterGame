@@ -396,7 +396,8 @@ def api_status():
         'is_control': is_control_user(),
         'impostor_guess_used': impostor_guess_used,
         'can_rejoin': game_started and player_name in assigned_words and player_name not in game_players,
-        'announce_spicy_mode': announce_spicy_mode
+        'announce_spicy_mode': announce_spicy_mode,
+        'start_votes': list(start_votes) if not game_started else []
     })
 
 @app.route("/", methods=["GET", "POST"])

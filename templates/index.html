@@ -808,6 +808,23 @@
             background: #f9f9f9;
             color: #999;
         }
+        .voted-badge {
+            position: absolute;
+            top: 7px;
+            right: 10px;
+            background: #444;
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 12px;
+            padding: 2px 10px 2px 8px;
+            z-index: 3;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.93;
+        }
     </style>
 </head>
 <body>
@@ -1043,6 +1060,7 @@
                 url: '/api/status',
                 method: 'GET',
                 success: function(data) {
+                    window.lastStatusData = data; // Save for updatePlayersGrid
                     announceSpicyMode = (typeof data.announce_spicy_mode !== 'undefined') ? data.announce_spicy_mode : true;
                     $('#player-count').text(data.players.length);
                     $('#total-players').text(data.players.length);
@@ -1391,6 +1409,18 @@
         
         function updatePlayersGrid(players) {
             let html = '';
+            // Determine voting context
+            let votingType = null;
+            let votedPlayers = [];
+            if (window.lastStatusData) {
+                if (!window.lastStatusData.game_started && window.lastStatusData.start_votes) {
+                    votingType = 'start';
+                    votedPlayers = window.lastStatusData.start_votes;
+                } else if (window.lastStatusData.voting_active && window.lastStatusData.votes) {
+                    votingType = 'impostor';
+                    votedPlayers = Object.keys(window.lastStatusData.votes);
+                }
+            }
             players.forEach(function(player) {
                 let kickButton = '';
                 let isCurrent = player === currentPlayerName;
@@ -1399,7 +1429,15 @@
                 if (isControl && !isCurrent) {
                     kickButton = `<button class="kick-button" onclick="kickPlayer('${player}')" title="Spieler kicken">×</button>`;
                 }
-                html += `<div class="player-card${extraClass}">${playerLabel}${kickButton}</div>`;
+                let votedBadge = '';
+                if (votingType === 'start' && players.length >= 3) {
+                    let hasVoted = votedPlayers.includes(player);
+                    votedBadge = `<span class="voted-badge">Voted: ${hasVoted ? '✅' : '🕒'}</span>`;
+                } else if (votingType === 'impostor') {
+                    let hasVoted = votedPlayers.includes(player);
+                    votedBadge = `<span class="voted-badge">Voted: ${hasVoted ? '✅' : '🕒'}</span>`;
+                }
+                html += `<div class="player-card${extraClass}">${playerLabel}${kickButton}${votedBadge}</div>`;
             });
             $('#players-grid').html(html);
         }
