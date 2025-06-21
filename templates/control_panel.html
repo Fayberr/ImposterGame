@@ -221,6 +221,32 @@
                 grid-template-columns: 1fr;
             }
         }
+        .live-stats-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 18px;
+            cursor: pointer;
+        }
+        .live-stats-overlay-content {
+            text-align: center;
+            font-size: 1.25em;
+            color: #e74c3c;
+            font-weight: bold;
+            background: rgba(255,255,255,0.95);
+            padding: 24px 32px;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .blurred {
+            filter: blur(10px) grayscale(0.2);
+            /* pointer-events: none; */
+            /* user-select: none; */
+        }
     </style>
 </head>
 <body>
@@ -233,10 +259,15 @@
             <div class="console-output" id="console-output">Lade...</div>
         </div>
         <!-- Live Stats Card -->
-        <div class="card">
+        <div class="card" id="live-stats-card" style="position:relative;">
             <div class="card-title">📊 Live Stats</div>
             <ul class="stats-list" id="stats-list"></ul>
             <button class="action-btn copy" id="copy-link-btn">🔗 Game-Link kopieren</button>
+            <div id="live-stats-overlay" class="live-stats-overlay" style="display:none;">
+                <div class="live-stats-overlay-content">
+                    <span>🚫 Spoiler!<br>Klicken zum Anzeigen</span>
+                </div>
+            </div>
         </div>
         <!-- Player List Card -->
         <div class="card">
@@ -304,6 +335,7 @@
 
     // --- Live Stats ---
     let gameLink = window.location.origin + '/';
+    let liveStatsRevealed = false;
     function updateStats() {
         fetch('/api/control_stats').then(r => r.json()).then(data => {
             let stats = [
@@ -323,6 +355,18 @@
             // Update settings
             document.getElementById('heartbeat-timeout').value = data.settings.heartbeat_timeout;
             document.getElementById('cleanup-interval').value = data.settings.cleanup_interval;
+
+            // --- Blur logic for live stats ---
+            const liveStatsCard = document.getElementById('live-stats-card');
+            const overlay = document.getElementById('live-stats-overlay');
+            // Blur if game is running (not lobby or ended)
+            if (data.game_state === 'running' && !liveStatsRevealed) {
+                liveStatsCard.classList.add('blurred');
+                overlay.style.display = 'flex';
+            } else {
+                liveStatsCard.classList.remove('blurred');
+                overlay.style.display = 'none';
+            }
         });
     }
     setInterval(updateStats, 2000);
@@ -476,6 +520,19 @@
             }
         });
     };
+
+    // Overlay click handler
+    document.addEventListener('DOMContentLoaded', function() {
+        liveStatsRevealed = false;
+        const overlay = document.getElementById('live-stats-overlay');
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                liveStatsRevealed = true;
+                document.getElementById('live-stats-card').classList.remove('blurred');
+                overlay.style.display = 'none';
+            });
+        }
+    });
     </script>
 </body>
 </html>
