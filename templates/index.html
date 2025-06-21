@@ -285,12 +285,9 @@
                 gap: 15px;
             }
         }
-        h1 {
-            color: #333;
-            font-size: 2.5em;
-            margin-top: 15px;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        h1, .game-title, .leaderboard-title, .chat-header, .card-title {
+            color: var(--text-main);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .live-indicator {
             position: absolute;
@@ -825,6 +822,409 @@
             gap: 4px;
             opacity: 0.93;
         }
+        :root {
+            --bg-main: #f5f6fa;
+            --bg-card: #fff;
+            --text-main: #222;
+            --text-secondary: #333;
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-btn: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            --gradient-btn-alt: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+        body {
+            background: var(--gradient-main);
+            color: var(--text-main);
+        }
+        .container, .card, .leaderboard-sidebar, .mobile-leaderboard {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            box-shadow: var(--card-shadow);
+        }
+        /* Dark mode overrides */
+        body.dark-mode {
+            --bg-main: #181a20;
+            --bg-card: #23242b;
+            --text-main: #fff;
+            --text-secondary: #b0b3c0;
+            --card-shadow: 0 8px 32px rgba(0,0,0,0.32);
+            --gradient-main: linear-gradient(135deg, #23242b 0%, #181a20 100%);
+            --gradient-btn: linear-gradient(135deg, #2979ff 0%, #1565c0 100%);
+            --gradient-btn-alt: linear-gradient(135deg, #232a3a 0%, #313244 100%);
+            --border-main: #282a36;
+            --accent-blue: #388bff;
+            --accent-teal: #00bcd4;
+            --accent-purple: #7c4dff;
+            --danger: #e53935;
+            --danger-hover: #b71c1c;
+        }
+        .dark-mode, .dark-mode * {
+            color: #fff !important;
+        }
+        .dark-mode .side-text, .dark-mode .muted, .dark-mode .hint, .dark-mode .disabled, .dark-mode .chat-container.disabled, .dark-mode .chat-container.disabled *, .dark-mode .player-card.disabled, .dark-mode .leaderboard-entry.disabled {
+            color: #c7c9d3 !important;
+        }
+        .dark-mode h1, .dark-mode .game-title, .dark-mode .leaderboard-title, .dark-mode .chat-header, .dark-mode .card-title, .dark-mode .section-title, .dark-mode .player-count {
+            color: #fff !important;
+            text-shadow: 0 2px 12px #000a;
+        }
+        .dark-mode .container, .dark-mode .card, .dark-mode .leaderboard-sidebar, .dark-mode .mobile-leaderboard {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            box-shadow: var(--card-shadow);
+            border: 1.5px solid #38405a;
+            border-radius: 18px;
+            box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+        }
+        .dark-mode .action-btn, .dark-mode .vote-button, .dark-mode .spicy-btn, .dark-mode .settings-save-btn {
+            background: var(--gradient-btn);
+            color: #fff;
+            border: 1.5px solid var(--accent-blue);
+            text-shadow: none;
+        }
+        .dark-mode .action-btn.reset {
+            background: var(--gradient-btn-alt);
+        }
+        .dark-mode .action-btn.copy {
+            background: var(--gradient-btn-alt);
+        }
+        .dark-mode .leaderboard-entry {
+            background: #262833;
+            color: #fff;
+            border: 1.5px solid #38405a;
+            border-radius: 12px;
+            margin-bottom: 7px;
+            box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+        }
+        .dark-mode .leaderboard-entry.top-1 {
+            background: linear-gradient(90deg, #2979ff 0%, #23242f 100%);
+            color: #fff;
+            border: 1.5px solid #388bff;
+        }
+        .dark-mode .leaderboard-entry.top-2 {
+            background: linear-gradient(90deg, #7c4dff 0%, #23242f 100%);
+            color: #fff;
+            border: 1.5px solid #7c4dff;
+        }
+        .dark-mode .leaderboard-entry.top-3 {
+            background: linear-gradient(90deg, #00bcd4 0%, #23242f 100%);
+            color: #fff;
+            border: 1.5px solid #00bcd4;
+        }
+        .dark-mode .leaderboard-entry .leaderboard-icon {
+            color: #ffd700 !important; /* gold for trophy */
+            filter: drop-shadow(0 0 2px #0008);
+        }
+        .dark-mode .leaderboard-entry .leaderboard-icon.silver {
+            color: #c0c0c0 !important;
+        }
+        .dark-mode .leaderboard-entry .leaderboard-icon.bronze {
+            color: #cd7f32 !important;
+        }
+        .dark-mode .chat-container, .dark-mode .chat-messages {
+            background: #23242b;
+            color: var(--text-main);
+            border: 1.5px solid #38405a;
+            border-radius: 14px;
+        }
+        .dark-mode .chat-input, .dark-mode .chat-send {
+            background: #23242b;
+            color: var(--text-main);
+            border: 1.5px solid #38405a;
+            border-radius: 10px;
+        }
+        .dark-mode .chat-container.disabled, .dark-mode .chat-container.disabled * {
+            background: #2c2c38 !important;
+            color: #b0b0b0 !important;
+            border-color: var(--border-main) !important;
+            opacity: 0.7 !important;
+        }
+        .dark-mode .player-card {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1.5px solid #38405a;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        }
+        .dark-mode .player-card.current-player {
+            background: linear-gradient(135deg, #388bff 0%, #23242b 100%) !important;
+            color: #fff !important;
+            border: 2px solid var(--accent-blue);
+            box-shadow: 0 2px 12px 0 rgba(56,139,255,0.18);
+        }
+        .dark-mode .kick-button {
+            background: var(--danger);
+        }
+        .dark-mode .kick-button:hover {
+            background: var(--danger-hover);
+        }
+        .dark-mode .voted-badge {
+            background: #313244;
+            color: var(--accent-blue);
+            border: 1.5px solid var(--accent-blue);
+        }
+        .dark-mode .custom-file-label {
+            background: var(--gradient-btn-alt);
+            color: var(--text-main);
+        }
+        .dark-mode .custom-file-label:hover {
+            background: var(--gradient-btn);
+        }
+        .dark-mode .selected-filename {
+            color: var(--text-main);
+            background: var(--bg-card);
+        }
+        .dark-mode .file-status.present {
+            color: var(--accent-teal);
+        }
+        .dark-mode .file-status.missing {
+            color: var(--danger);
+        }
+        .dark-mode .filename {
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 18px;
+            right: 28px;
+            z-index: 1000;
+            background: rgba(35,36,43,0.95);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35em;
+            color: #7c4dff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 4px 24px #0002;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(4px);
+            padding: 0;
+            line-height: 1;
+            aspect-ratio: 1 / 1;
+        }
+        .dark-mode .dark-mode-toggle {
+            background: rgba(35,36,43,0.95);
+            color: #7c4dff;
+            box-shadow: 0 0 12px #7c4dff, 0 2px 8px rgba(0,0,0,0.10);
+        }
+        .dark-mode-toggle:hover {
+            box-shadow: 0 0 18px #7c4dff, 0 2px 8px rgba(0,0,0,0.10);
+        }
+        /* Username input field in dark mode */
+        .dark-mode input[type="text"], .dark-mode input[type="password"], .dark-mode input[type="email"] {
+            background: #23242b;
+            color: #fff;
+            border: 1.5px solid #38405a;
+        }
+        .dark-mode input[type="text"]::placeholder, .dark-mode input[type="password"]::placeholder, .dark-mode input[type="email"]::placeholder {
+            color: #b0b3c0;
+            opacity: 1;
+        }
+        /* Game start vote card in dark mode */
+        .dark-mode .vote-card, .dark-mode .game-start-card, .dark-mode .start-vote-card {
+            background: #23242b !important;
+            color: #fff !important;
+            border: 1.5px solid #388bff;
+            box-shadow: 0 2px 12px 0 rgba(56,139,255,0.10);
+            filter: none !important;
+        }
+        .dark-mode .vote-card *, .dark-mode .game-start-card *, .dark-mode .start-vote-card * {
+            color: #fff !important;
+        }
+        /* Chat messages in dark mode - vibrant and separated */
+        .dark-mode .chat-message, .dark-mode .chat-msg, .dark-mode .chat-bubble {
+            color: #fff !important;
+            border-radius: 8px;
+            border: 1px solid #388bff;
+            box-shadow: 0 2px 8px 0 rgba(56,139,255,0.10);
+        }
+        .dark-mode .chat-message.system, .dark-mode .chat-msg.system, .dark-mode .chat-bubble.system {
+            background: linear-gradient(90deg, #7c4dff 0%, #00bcd4 100%) !important;
+            border: 1px solid #7c4dff;
+        }
+        .dark-mode .chat-message.own, .dark-mode .chat-msg.own, .dark-mode .chat-bubble.own {
+            background: linear-gradient(90deg, #2979ff 0%, #00bcd4 100%) !important;
+            border: 1px solid #2979ff;
+        }
+        .dark-mode .chat-message.other, .dark-mode .chat-msg.other, .dark-mode .chat-bubble.other {
+            background: linear-gradient(90deg, #00c853 0%, #00bcd4 100%) !important;
+            border: 1px solid #00c853;
+        }
+        .dark-mode .chat-message .timestamp, .dark-mode .chat-msg .timestamp, .dark-mode .chat-bubble .timestamp,
+        .dark-mode .chat-message .username, .dark-mode .chat-msg .username, .dark-mode .chat-bubble .username {
+            color: #b0b3c0 !important;
+        }
+        /* --- VIBRANT DARK MODE STYLES FOR VOTES & CHAT --- */
+        .dark-mode .start-vote-card {
+            background: linear-gradient(90deg, #23272f 60%, #2979ff 100%) !important;
+            color: #fff !important;
+            border: 2px solid #388bff;
+            box-shadow: 0 2px 12px 0 rgba(56,139,255,0.18);
+            border-radius: 14px;
+            padding: 18px 24px;
+            margin: 0 auto 18px auto;
+            max-width: 420px;
+        }
+        .dark-mode .vibrant-vote-btn {
+            background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%) !important;
+            color: #fff !important;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 0 0 8px #00c6ff55;
+            transition: box-shadow 0.2s;
+        }
+        .dark-mode .voted-info {
+            color: #00ffb3;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .dark-mode .vote-progress-info {
+            color: #00bcd4;
+            font-weight: bold;
+        }
+        /* Chat message vibrant styles */
+        .dark-mode .chat-message {
+            background: linear-gradient(90deg, #23272f 60%, #2979ff 100%) !important;
+            color: #fff !important;
+            border: 1.5px solid #388bff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px 0 rgba(56,139,255,0.10);
+        }
+        .dark-mode .chat-message.own {
+            background: linear-gradient(90deg, #2979ff 0%, #00bcd4 100%) !important;
+            border: 1.5px solid #2979ff;
+        }
+        .dark-mode .chat-message.event {
+            background: linear-gradient(90deg, #ffb347 0%, #ffcc33 100%) !important;
+            color: #23272f !important;
+            border: 1.5px solid #ff9800;
+            font-weight: bold;
+        }
+        .dark-mode .chat-player {
+            color: #00bcd4 !important;
+        }
+        .dark-mode .chat-player.event {
+            color: #ff9800 !important;
+        }
+        .dark-mode .chat-time {
+            color: #b0b3c0 !important;
+        }
+        .dark-mode .chat-time.event {
+            color: #ff9800 !important;
+        }
+        .dark-mode .chat-message.event {
+            background: linear-gradient(90deg, #6a1b9a 0%, #8e24aa 100%) !important;
+            color: #f3e8ff !important;
+            border: 1.5px solid #b39ddb;
+            font-weight: bold;
+            padding: 12px 16px;
+        }
+        .dark-mode .chat-time.event {
+            color: #d1b3ff !important;
+        }
+        .dark-mode .chat-message.own {
+            background: linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%) !important;
+            border: 1.5px solid #2193b0;
+            color: #23272f !important;
+            padding: 12px 16px;
+        }
+        .dark-mode .chat-player {
+            color: #00e6ff !important;
+        }
+        .dark-mode .chat-player.event {
+            color: #d1b3ff !important;
+        }
+        .dark-mode .chat-player.own {
+            color: #009688 !important;
+        }
+        .dark-mode .chat-time {
+            color: #b0b3c0 !important;
+        }
+        .dark-mode .chat-message {
+            padding: 12px 16px;
+        }
+        .dark-mode .voting-section {
+            background: #23242b !important;
+            border: 2px solid #7c4dff !important;
+            border-radius: 15px;
+            box-shadow: 0 2px 12px 0 rgba(124,77,255,0.10);
+        }
+        .dark-mode .vote-progress {
+            background: #23272f !important;
+            border: 2px solid #388bff !important;
+            color: #b0b3c0 !important;
+        }
+        .dark-mode .vote-grid {
+            gap: 16px;
+        }
+        .dark-mode .vote-option {
+            background: #23272f !important;
+            border: 2px solid #388bff !important;
+            color: #fff !important;
+            border-radius: 10px;
+            transition: background 0.2s, border 0.2s, color 0.2s;
+        }
+        .dark-mode .vote-option.selected {
+            background: linear-gradient(90deg, #2979ff 0%, #7c4dff 100%) !important;
+            border: 2.5px solid #7c4dff !important;
+            color: #fff !important;
+            box-shadow: 0 0 8px #7c4dff55;
+        }
+        .dark-mode .vote-option.disabled {
+            background: #23272f !important;
+            border: 2px solid #38405a !important;
+            color: #888 !important;
+            opacity: 0.5;
+        }
+        .dark-mode .vote-button {
+            background: linear-gradient(90deg, #2979ff 0%, #7c4dff 100%) !important;
+            color: #fff !important;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 0 8px #7c4dff33;
+            transition: box-shadow 0.2s;
+        }
+        .dark-mode .vote-button:disabled {
+            background: #38405a !important;
+            color: #aaa !important;
+            box-shadow: none;
+        }
+        .dark-mode .game-end-section.victory {
+            background: linear-gradient(135deg, #114d2c 0%, #176d3b 60%, #27ae60 100%) !important;
+            color: #fff !important;
+        }
+        .dark-mode .game-end-section.impostor-win {
+            background: linear-gradient(135deg, #4b2067 0%, #7c4dff 100%) !important;
+            color: #fff !important;
+        }
+        .dark-mode .game-end-section strong.guess-wrong {
+            color: #ff5252 !important;
+            text-shadow: 1px 1px 4px #000a, 0 0 2px #fff2;
+        }
+        .dark-mode .game-end-section strong.guess-right {
+            color: #7fff9f !important;
+            text-shadow: 1px 1px 4px #000a, 0 0 2px #fff2;
+        }
+        .dark-mode .game-end-word {
+            background: rgba(255,255,255,0.07) !important;
+            color: #fff !important;
+        }
+        .dark-mode .game-end-section.defeat {
+            background: linear-gradient(135deg, #7b1e1e 0%, #e74c3c 100%) !important;
+            color: #fff !important;
+        }
+        .dark-mode .game-end-section {
+            border-radius: 24px;
+        }
     </style>
 </head>
 <body>
@@ -942,7 +1342,7 @@
             <div class="players-section">
                 <h2 class="players-title">Spieler (<span id="player-count">0</span>)</h2>
                 
-                <div id="start-vote-section" style="display:none;margin-bottom:20px;"></div>
+                <div id="start-vote-section" style="display:none;"></div>
                 
                 <div id="game-started-section" style="display: none;">
                     <div class="game-status">
@@ -1028,6 +1428,8 @@
         Du wurdest aus dem Spiel entfernt.<br>Du kannst erneut beitreten.
       </div>
     </div>
+
+    <button class="dark-mode-toggle" id="dark-mode-toggle" title="Dark Mode umschalten">🌙</button>
 
     <script>
         let currentPlayerName = '';
@@ -1291,15 +1693,16 @@
                 endTitle.text('🎭 IMPOSTOR GEWINNT! 🎭');
                 endWord.text(voteResults.winning_word);
                 endMessage.html(`<strong>${voteResults.impostor}</strong> hat das Wort erraten!<br>
-                               <span style="color: #a7ff83; font-weight: bold; text-shadow: 1px 1px 2px #333;">Geraten: "${voteResults.guessed_word}"</span><br>
+                               <strong class="guess-right">Geraten: "${voteResults.guessed_word}"</strong><br>
+                               <strong class="guess-right">Richtig war: "${voteResults.actual_word}"</strong><br>
                                Der Impostor hat gewonnen!`);
             } else if (voteResults.impostor_failed) {
                 endContent.removeClass('defeat impostor-win').addClass('victory');
                 endTitle.text('🎉 SPIELER GEWINNEN! 🎉');
                 endWord.text(voteResults.winning_word);
                 endMessage.html(`<strong>${voteResults.impostor}</strong> hat falsch geraten!<br>
-                               <span style="color: #e74c3c; font-weight: bold; text-shadow: 1px 1px 2px #333;">Geraten: "${voteResults.guessed_word}"</span><br>
-                               <span style="color: #a7ff83; font-weight: bold; text-shadow: 1px 1px 2px #333;">Richtig war: "${voteResults.actual_word}"</span><br>
+                               <strong class="guess-wrong">Geraten: "${voteResults.guessed_word}"</strong><br>
+                               <strong class="guess-right">Richtig war: "${voteResults.actual_word}"</strong><br>
                                Die Spieler haben gewonnen!`);
             } else if (voteResults.is_impostor) {
                 endContent.removeClass('defeat impostor-win').addClass('victory');
@@ -1606,14 +2009,14 @@
                     let total = data.players.length;
                     let buttonHtml = '';
                     if (!alreadyVoted) {
-                        buttonHtml = `<button id="start-vote-btn" class="vote-button" style="margin-top:10px;">🟢 Für Spielstart stimmen</button>`;
+                        buttonHtml = `<button id="start-vote-btn" class="vote-button vibrant-vote-btn" style="margin-top:10px;">🟢 Für Spielstart stimmen</button>`;
                     } else {
-                        buttonHtml = `<span style="color:#27ae60;font-weight:bold;">Du hast für den Start gestimmt!</span>`;
+                        buttonHtml = `<span class="voted-info">Du hast für den Start gestimmt!</span>`;
                     }
                     $('#start-vote-section').html(`
-                        <div style="background:#f8f9fa;padding:12px 18px;border-radius:10px;border:1.5px solid #27ae60;max-width:400px;margin:0 auto 10px auto;">
+                        <div class="start-vote-card">
                             <b>Abstimmung: Spiel starten</b><br>
-                            <span style="color:#27ae60;">${voteCount} / ${total} Spieler haben für den Start gestimmt.</span><br>
+                            <span class="vote-progress-info">${voteCount} / ${total} Spieler haben für den Start gestimmt.</span><br>
                             ${buttonHtml}
                         </div>
                     `).show();
@@ -1643,6 +2046,27 @@
             });
         }
         setInterval(checkIfKicked, 2000);
+
+        // Dark mode toggle logic
+        function setDarkMode(enabled) {
+            if (enabled) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('dark-mode-toggle').textContent = '☀️';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('dark-mode-toggle').textContent = '🌙';
+            }
+            localStorage.setItem('darkMode', enabled ? '1' : '0');
+        }
+        document.getElementById('dark-mode-toggle').onclick = function() {
+            setDarkMode(!document.body.classList.contains('dark-mode'));
+        };
+        // On page load, apply saved preference
+        (function() {
+            const saved = localStorage.getItem('darkMode');
+            if (saved === '1') setDarkMode(true);
+            else setDarkMode(false);
+        })();
     </script>
 </body>
 </html>

@@ -17,7 +17,7 @@ import glob
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
-CONTROL_PASSWORD = "test"
+CONTROL_PASSWORD = "default"
 CONTROL_USERS = {"Control", "Admin"}
 
 LEADERBOARD_FILE = 'leaderboard.json'

@@ -1,8 +1,23 @@
 {
     "players": {
-        "test2": 34,
-        "test1": 6,
-        "test3": 1
+        "Alice": 42,
+        "Bob": 35,
+        "Charlie": 27,
+        "Diana": 19,
+        "Eve": 13,
+        "Frank": 7,
+        "Grace": 3,
+        "test2": 3,
+        "test3": 2,
+        "test1": 3
     },
-    "impostors": {}
+    "impostors": {
+        "Mallory": 38,
+        "Oscar": 29,
+        "Peggy": 21,
+        "Trent": 15,
+        "Victor": 9,
+        "Walter": 4,
+        "test2": 1
+    }
 }
